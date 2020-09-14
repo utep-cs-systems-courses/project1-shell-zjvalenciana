@@ -1,0 +1,16 @@
+Child:  ...trying to exec /usr/local/sbin/wc
+Child:  ...trying to exec /usr/local/bin/wc
+Child:  ...trying to exec /usr/sbin/wc
+Child:  ...trying to exec /usr/bin/wc
+  75  233 2562 shell-valenciana.py
+.py
+p2-wait.c
+p2-wait.py
+p3-exec.c
+p3-exec.py
+p4-output.txt
+p4-redirect.c
+p4-redirect.py
+p5-pipe-fork.py
+README.md
+shell-valenciana.py
