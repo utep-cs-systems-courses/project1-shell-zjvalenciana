@@ -27,7 +27,7 @@ while 1: #keep rinning until user exits
     def exe(args): #exec 
         for dir in re.split(":", os.environ['PATH']): # try each directory in the path
             program = "%s/%s" % (dir, args[0])
-            os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
+            #os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
             try:
                 os.execve(program, args, os.environ) # try to exec program
             except FileNotFoundError:             # ...expected
@@ -106,9 +106,9 @@ while 1: #keep rinning until user exits
 
         else:                           # parent (forked ok)
             if not '&' in comand:
-                os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" % (pid, rc)).encode())
+                #os.write(1, ("Parent: My pid=%d.  Child's pid=%d\n" % (pid, rc)).encode())
                 childPidCode = os.wait() #wait and get child pid and return code 
-                os.write(1, ("Parent: Child %d terminated with exit code %d\n" % childPidCode).encode())
+                #os.write(1, ("Parent: Child %d terminated with exit code %d\n" % childPidCode).encode())
 
 
     if not comand: #if no commands typed keep prompting
