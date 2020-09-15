@@ -52,12 +52,7 @@ while 1: #keep rinning until user exits
             os.write(2, ("fork failed, returning %d\n" % rc).encode())
             sys.exit(1)
 
-
-
         elif rc == 0:                   # child
-
-
-
             if '>' in args:
                 os.close(1)                 # redirect child's stdout
                 os.open(args[-1], os.O_CREAT | os.O_WRONLY);
@@ -107,7 +102,6 @@ while 1: #keep rinning until user exits
 
             else:
                 exe(args)
-
 
 
         else:                           # parent (forked ok)
