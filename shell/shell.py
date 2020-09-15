@@ -1,4 +1,3 @@
-  
 #! /usr/bin/env python3
 
 import os, sys, time, re
@@ -9,6 +8,10 @@ while 1: #keep rinning until user exits
 
     if 'PS1' in os.environ: #if we have PS1 in envirnment use
         os.write(1, (os.environ['PS1']).encode())
+        try:
+            comand = [str(n) for n in input().split()]
+        except EOFError:    #catch error
+            sys.exit(1)
     else:
         os.write(1, ('$ ').encode())    #otherwise type $
         try:
@@ -24,14 +27,22 @@ while 1: #keep rinning until user exits
             pass
         continue
 
-    def exe(args): #exec 
-        for dir in re.split(":", os.environ['PATH']): # try each directory in the path
-            program = "%s/%s" % (dir, args[0])
-            #os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
+    def exe(args): #exec
+    
+        if '/' in args:
             try:
-                os.execve(program, args, os.environ) # try to exec program
+                os.execve(program, args = NONE, os.environ) # try to exec program
             except FileNotFoundError:             # ...expected
                 pass                              # ...fail quietly
+
+        else: 
+            for dir in re.split(":", os.environ['PATH']): # try each directory in the path
+                program = "%s/%s" % (dir, args[0])
+                os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
+                try:
+                    os.execve(program, args, os.environ) # try to exec program
+                except FileNotFoundError:             # ...expected
+                    pass                              # ...fail quietly
 
         os.write(2, (f"{args[0]}: command not found.").encode())
         sys.exit(1)                 # terminate with error
