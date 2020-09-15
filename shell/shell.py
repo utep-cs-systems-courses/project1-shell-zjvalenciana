@@ -42,7 +42,7 @@ while 1: #keep rinning until user exits
     def run_comand(comand):
         rc = os.fork()      #create child process 
         args = comand.copy()
-
+        args2 = ' '.join([str(elem) for elem in args])
 
         if '&' in args:
             args.remove('&')
@@ -72,12 +72,12 @@ while 1: #keep rinning until user exits
                 argg = args[0:args.index("<")]
                 exe(argg)
 
-            '''if '/' in args:
+            if '/' in args[0]:  #handle pathnames to execute 
                 program = args[0]
                 try:
                     os.execve(program, args, os.environ) # try to exec program
                 except FileNotFoundError:             # ...expected
-                    pass'''   
+                    pass  
 
             if '|' in args:                 #pipe command 
                 args = ' '.join([str(elem) for elem in args])
