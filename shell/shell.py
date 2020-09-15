@@ -27,22 +27,14 @@ while 1: #keep rinning until user exits
             pass
         continue
 
-    def exe(args): #exec
-    
-        if '/' in args:
+    def exe(args): #exec 
+        for dir in re.split(":", os.environ['PATH']): # try each directory in the path
+            program = "%s/%s" % (dir, args[0])
+            #os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
             try:
-                os.execve(program, args = NONE, os.environ) # try to exec program
+                os.execve(program, args, os.environ) # try to exec program
             except FileNotFoundError:             # ...expected
                 pass                              # ...fail quietly
-
-        else: 
-            for dir in re.split(":", os.environ['PATH']): # try each directory in the path
-                program = "%s/%s" % (dir, args[0])
-                os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
-                try:
-                    os.execve(program, args, os.environ) # try to exec program
-                except FileNotFoundError:             # ...expected
-                    pass                              # ...fail quietly
 
         os.write(2, (f"{args[0]}: command not found.").encode())
         sys.exit(1)                 # terminate with error
@@ -79,6 +71,13 @@ while 1: #keep rinning until user exits
 
                 argg = args[0:args.index("<")]
                 exe(argg)
+
+            '''if '/' in args:
+                program = args[0]
+                try:
+                    os.execve(program, args, os.environ) # try to exec program
+                except FileNotFoundError:             # ...expected
+                    pass'''   
 
             if '|' in args:                 #pipe command 
                 args = ' '.join([str(elem) for elem in args])
