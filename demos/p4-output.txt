@@ -1,9 +1,11 @@
-Child:  ...trying to exec /usr/local/sbin/wc
-Child:  ...trying to exec /usr/local/bin/wc
-Child:  ...trying to exec /usr/sbin/wc
-Child:  ...trying to exec /usr/bin/wc
-  75  233 2562 shell-valenciana.py
-.py
+Child:  ...trying to exec /usr/local/sbin/ls
+Child:  ...trying to exec /usr/local/bin/ls
+Child:  ...trying to exec /usr/sbin/ls
+Child:  ...trying to exec /usr/bin/ls
+Makefile
+p0-io.py
+p1-fork.c
+p1-fork.py
 p2-wait.c
 p2-wait.py
 p3-exec.c

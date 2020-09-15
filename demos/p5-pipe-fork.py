@@ -21,7 +21,7 @@ if rc < 0:
 
 elif rc == 0:                   #  child - will write to pipe
     print("Child: My pid==%d.  Parent's pid=%d" % (os.getpid(), pid), file=sys.stderr)
-    args = ["wc", "p3-exec.py"]
+    #args = ["wc", "p3-exec.py"]
 
     os.close(1)                 # redirect child's stdout
     os.dup(pw)

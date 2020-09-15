@@ -1,15 +1,40 @@
+  
+#! /usr/bin/env python3
+
 import os, sys, time, re
 
 while 1: #keep rinning until user exits
-    cwd = os.getcwd()
+
     pid = os.getpid()
 
-    comand = [str(n) for n in input('$ ').split()] #prompt for command and parameters 
+    if 'PS1' in os.environ:
+        os.write(1, (os.environ['PS1']).encode())
+    else:
+        os.write(1, ('$ ').encode())
+        try:
+            comand = [str(n) for n in input().split()]
+        except EOFError:
+            sys.exit(1)
+
+    def exe(args):
+        for dir in re.split(":", os.environ['PATH']): # try each directory in the path
+            program = "%s/%s" % (dir, args[0])
+            os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
+            try:
+                os.execve(program, args, os.environ) # try to exec program
+            except FileNotFoundError:             # ...expected
+                pass                              # ...fail quietly
+
+        os.write(2, (f"{args[0]}: command not found.").encode())
+        sys.exit(1)                 # terminate with error
 
     def run_comand(comand):
         rc = os.fork()
         args = comand.copy()
-        
+
+        if '&' in args:
+            args.remove('&')
+
         if args[0] == 'exit':
             sys.exit(0)
 
@@ -17,9 +42,6 @@ while 1: #keep rinning until user exits
         if rc < 0:
             os.write(2, ("fork failed, returning %d\n" % rc).encode())
             sys.exit(1)
-
-
-
 
 
 
@@ -34,17 +56,7 @@ while 1: #keep rinning until user exits
                 os.set_inheritable(1, True)
 
                 argg = args[0:args.index(">")]
-
-                for dir in re.split(":", os.environ['PATH']): # try each directory in the path
-                    program = "%s/%s" % (dir, argg[0])
-                    os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
-                    try:
-                        os.execve(program, argg, os.environ) # try to exec program
-                    except FileNotFoundError:             # ...expected
-                        pass                              # ...fail quietly
-
-                os.write(2, (f"{argg[0]}: command not found.").encode())
-                sys.exit(1)                 # terminate with error
+                exe(argg)
 
             if '<' in args:
                 os.close(0)                 # redirect child's stdin
@@ -52,42 +64,59 @@ while 1: #keep rinning until user exits
                 os.set_inheritable(0, True)
 
                 argg = args[0:args.index("<")]
+                exe(argg)
 
-                for dir in re.split(":", os.environ['PATH']): # try each directory in the path
-                    program = "%s/%s" % (dir, argg[0])
-                    os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
-                    try:
-                        os.execve(program, argg, os.environ) # try to exec program
-                    except FileNotFoundError:             # ...expected
-                        pass                              # ...fail quietly
+            if '|' in args:                 #pipe command 
+                args = ' '.join([str(elem) for elem in args])
+                pipe = args.split("|")
+                prog1 = pipe[0].split()
+                prog2 = pipe[1].split()
 
-                os.write(2, (f"{argg[0]}: command not found.").encode())
-                sys.exit(1)                 # terminate with error
+                pr, pw = os.pipe()  #file descriptors for reading and writing
+                for f in (pr, pw):
+                    os.set_inheritable(f, True)
+
+                pipeFork = os.fork()
+                if pipeFork < 0:    #fork failed
+                    os.write(2, ("fork failed").encode())
+                    sys.exit(1)
+                
+                elif pipeFork == 0: #child process which will write to pipe
+                    os.close(1)     #close fd 1 and rederict it
+                    os.dup(pw)      #attach fd1 to pipe input fd
+                    os.set_inheritable(1, True) #set fd1 inheritable
+                    for fd in (pr, pw):
+                        os.close(fd)
+                    exe(prog1)
+
+                else:               #parent
+                    os.close(0)
+                    os.dup(pr)
+                    os.set_inheritable(0, True)
+                    for fd in (pw, pr):
+                        os.close(fd)
+                    exe(prog2)
 
             else:
-                for dir in re.split(":", os.environ['PATH']): # try each directory in the path
-                    program = "%s/%s" % (dir, args[0])
-                    os.write(1, ("Child:  ...trying to exec %s\n" % program).encode())
-                    try:
-                        os.execve(program, args, os.environ) # try to exec program
-                    except FileNotFoundError:             # ...expected
-                        pass                              # ...fail quietly
-
-                os.write(2, (f"{args[0]}: command not found.").encode())
-                sys.exit(1)                 # terminate with error
-
-
-
-
+                exe(args)
 
 
 
         else:                           # parent (forked ok)
+            '''if '&' in comand:
+                #comand.remove("&")
+            #childPidCode = os.wait()
+                #os.write(1, ("Parent: Child %d terminated with exit code %d\n" % 
+                        #childPidCode).encode())
+                pass
+
+            else:'''
             childPidCode = os.wait()
             os.write(1, ("Parent: Child %d terminated with exit code %d\n" % 
-                        childPidCode).encode())
-            print(f"current directory: {cwd}")
+                    childPidCode).encode())
     
+
+
     if not comand: #if no commands typed keep prompting
         pass
     else:
